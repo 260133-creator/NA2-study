@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>NA2 학습 대시보드</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">N2</div><div><strong>NA2 학습 대시보드</strong><small>네트워크관리사 2급 · 개인 학습 기록</small></div></div>
+    <div class="top-actions">
+      <button id="exportBtn" class="btn btn-ghost">기록 백업</button>
+      <label class="btn btn-ghost file-btn">백업 가져오기<input id="importInput" type="file" accept="application/json,.json"></label>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div><p class="eyebrow">MY LEARNING SPACE</p><h1>오늘의 학습을<br><span>점수와 기록으로</span> 확인하세요.</h1>
+      <p class="hero-copy">이론 · 필기 · 실기 진행 상황을 한 곳에서 관리하고, 오답과 점수 변화를 바탕으로 다음 학습을 계획합니다.</p></div>
+      <div class="hero-stat"><span class="stat-label">누적 풀이</span><strong id="totalAttempts">0</strong><span>회 응답</span><div class="mini-track"><i id="heroProgress"></i></div><small id="heroProgressText">정답률 0%</small></div>
+    </section>
+    <section class="stats-grid">
+      <article class="stat-card"><span class="stat-icon purple">✓</span><div><small>전체 정답률</small><strong id="overallAccuracy">0%</strong><em id="accuracySub">아직 풀이 기록이 없습니다</em></div></article>
+      <article class="stat-card"><span class="stat-icon blue">◷</span><div><small>오늘 푼 문제</small><strong id="todayAttempts">0</strong><em>오늘 기록 기준</em></div></article>
+      <article class="stat-card"><span class="stat-icon orange">!</span><div><small>미해결 오답</small><strong id="openMistakes">0</strong><em>다시 풀어볼 문제</em></div></article>
+      <article class="stat-card"><span class="stat-icon green">↗</span><div><small>최근 7일 정답률</small><strong id="weeklyAccuracy">0%</strong><em>최근 풀이 기준</em></div></article>
+    </section>
+    <nav class="tabs" aria-label="학습 영역">
+      <button class="tab active" data-view="dashboard">대시보드</button>
+      <button class="tab" data-view="theory">이론</button>
+      <button class="tab" data-view="written">필기</button>
+      <button class="tab" data-view="practical">실기</button>
+      <button class="tab" data-view="mistakes">오답노트 <span id="mistakeBadge">0</span></button>
+      <button class="tab" data-view="records">학습 기록</button>
+    </nav>
+    <section id="view-dashboard" class="view">
+      <div class="section-heading"><div><p class="eyebrow">OVERVIEW</p><h2>학습 현황</h2></div><span class="muted" id="lastSaved">이 기기의 브라우저에 자동 저장됩니다</span></div>
+      <div class="dashboard-grid">
+        <article class="panel chart-panel"><div class="panel-head"><div><h3>영역별 정답률</h3><p>누적 풀이를 바탕으로 계산</p></div><span class="chip">Accuracy</span></div><div id="categoryChart" class="bar-chart"></div></article>
+        <article class="panel"><div class="panel-head"><div><h3>최근 학습 추이</h3><p>최근 7일 정답률</p></div><span class="chip">7 days</span></div><div id="trendChart" class="trend-chart"></div></article>
+        <article class="panel wide"><div class="panel-head"><div><h3>다음 학습 추천</h3><p>오답과 영역별 성과 기반</p></div></div><div id="recommendations" class="recommendations"></div></article>
+      </div>
+    </section>
+    <section id="view-theory" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">LEARN</p><h2>이론 학습</h2></div><span class="muted">개념을 읽고 이해도를 직접 기록하세요</span></div>
+      <div class="content-layout"><div id="theoryList" class="topic-list"></div><article class="panel detail-panel" id="theoryDetail"><p class="muted">왼쪽에서 이론 주제를 선택하세요.</p></article></div>
+    </section>
+    <section id="view-written" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">WRITTEN EXAM</p><h2>필기 문제풀이</h2></div><span class="muted">정답 제출 시 점수와 오답이 기록됩니다</span></div>
+      <div class="quiz-toolbar"><label>주제 <select id="writtenTopic"><option value="all">전체 주제</option></select></label><label>문제 순서 <select id="writtenMode"><option value="all">전체 문제</option><option value="unseen">미풀이</option><option value="mistakes">오답 우선</option></select></label><button id="resetQuiz" class="btn btn-ghost">선택 초기화</button></div>
+      <div id="writtenQuiz" class="quiz-area"></div>
+    </section>
+    <section id="view-practical" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">PRACTICAL EXAM</p><h2>실기 연습</h2></div><span class="muted">작업형 · 실습형 · 단답형/객관식</span></div>
+      <div class="segmented" id="practicalKinds"><button class="selected" data-kind="all">전체</button><button data-kind="work">작업형</button><button data-kind="lab">실습형</button><button data-kind="short">단답형/객관식</button></div>
+      <div id="practicalQuiz" class="quiz-area"></div>
+    </section>
+    <section id="view-mistakes" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">REVIEW</p><h2>오답노트</h2></div><span class="muted">다시 맞히면 미해결 오답에서 제외됩니다</span></div>
+      <div id="mistakeList" class="mistake-list"></div>
+    </section>
+    <section id="view-records" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">HISTORY</p><h2>학습 기록</h2></div><button id="clearRecords" class="btn btn-danger">모든 기록 초기화</button></div>
+      <div class="record-filters"><label>영역 <select id="recordFilter"><option value="all">전체</option><option value="theory">이론</option><option value="written">필기</option><option value="practical">실기</option></select></label><label>결과 <select id="resultFilter"><option value="all">전체</option><option value="correct">정답</option><option value="wrong">오답</option><option value="study">이론 학습완료</option></select></label></div>
+      <div class="table-wrap"><table><thead><tr><th>일시</th><th>영역</th><th>문제/주제</th><th>내 답</th><th>결과</th><th>점수</th></tr></thead><tbody id="recordRows"></tbody></table></div>
+    </section>
+    <footer><span>NA2 Study Dashboard · 로컬 학습 도구</span><span>기록은 현재 브라우저에 저장됩니다. 정기적으로 백업하세요.</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./src/app.js"></script>
+</body>
+</html>
